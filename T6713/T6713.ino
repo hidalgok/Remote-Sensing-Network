@@ -1,3 +1,5 @@
+#include <TimeLib.h>
+
 //Taken from: https://github.com/AmphenolAdvancedSensors/Telaire/tree/T6700_Series
 /*
 Copyright (c) 2016 Amphenol Advanced Sensors
@@ -46,6 +48,7 @@ char DisplayUnit[] = "ppm";
 {
   Serial.begin(115200);  // start serial for output
   Wire.begin();
+  setTime(17,16,0,20,6,2018);
   //Serial.println(SplashScreen);
   //Serial.print(line); Serial.print("\t");
   //displaySetupScreen();
@@ -55,7 +58,7 @@ char DisplayUnit[] = "ppm";
 void loop() {
 
   GetCO2PPM();
-  Serial.print(CO2ppmValue); Serial.print(DisplayUnit); Serial.print("\n");
+  Serial.print(CO2ppmValue); Serial.print(DisplayUnit); Serial.print(" "); Serial.print(hour()); printDigits(minute()); printDigits(second()); Serial.println("\n");
   /*
   if ( k < 9 )
   {
@@ -69,6 +72,14 @@ void loop() {
   displayReading(CO2ppmValue, DisplayUnit, ScreenHeader, ScreenFooter);
   */
   delay(2000);
+}
+
+void printDigits(int digits) {
+ // utility function for digital clock display: prints preceding colon and leading 0
+ Serial.print(":");
+ if (digits < 10)
+ Serial.print('0');
+ Serial.print(digits);
 }
 
 
