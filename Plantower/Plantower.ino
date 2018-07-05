@@ -16,56 +16,41 @@ void setup()
   Serial1.begin(9600);
   Serial2.begin(9600);
   Serial3.begin(9600);
-  setTime(12,37,0,4,7,2018);  
+  setTime(14,44,0,4,7,2018);  
 }
 
 void loop()
 {
-  if (pms5.read(data5))
-  {
-    Serial.print("PMS5003"); Serial.print(" "); Serial.print(hour()); printDigits(minute()); printDigits(second()); Serial.print("\n");
-    Serial.print("PM 1.0 (ug/m3): ");
-    Serial.println(data5.PM_AE_UG_1_0);
+  while(!(pms5.read(data5))){}
+  Serial.print(data5.PM_AE_UG_1_0);
+  Serial.print(",");
+  Serial.print(data5.PM_AE_UG_2_5);
+  Serial.print(",");
+  Serial.print(data5.PM_AE_UG_10_0);
+  Serial.print(",");
+  
+  while(!(pms6.read(data6))){}
+  Serial.print(data6.PM_AE_UG_1_0);
+  Serial.print(",");
+  Serial.print(data6.PM_AE_UG_2_5);
+  Serial.print(",");
+  Serial.print(data6.PM_AE_UG_10_0);
+  Serial.print(",");
+  
+  while(!(pmsX.read(dataX))){}
+  Serial.print(dataX.PM_AE_UG_1_0);
+  Serial.print(",");
+  Serial.print(dataX.PM_AE_UG_2_5);
+  Serial.print(",");
+  Serial.print(dataX.PM_AE_UG_10_0);
+  Serial.print(",");
 
-    Serial.print("PM 2.5 (ug/m3): ");
-    Serial.println(data5.PM_AE_UG_2_5);
+  Serial.print(hour()); 
+  printDigits(minute()); 
+  printDigits(second()); 
+  Serial.println();
 
-    Serial.print("PM 10.0 (ug/m3): ");
-    Serial.println(data5.PM_AE_UG_10_0);
-
-    Serial.println();
-    delay(4000);
-  }
-  if (pms6.read(data6))
-  {
-    Serial.print("PMS6003"); Serial.print(" "); Serial.print(hour()); printDigits(minute()); printDigits(second()); Serial.print("\n");
-    Serial.print("PM 1.0 (ug/m3): ");
-    Serial.println(data6.PM_AE_UG_1_0);
-
-    Serial.print("PM 2.5 (ug/m3): ");
-    Serial.println(data6.PM_AE_UG_2_5);
-
-    Serial.print("PM 10.0 (ug/m3): ");
-    Serial.println(data6.PM_AE_UG_10_0);
-
-    Serial.println();
-    delay(4000);
-  }
-  if (pmsX.read(dataX))
-  {
-    Serial.print("PMSX003");Serial.print(" "); Serial.print(hour()); printDigits(minute()); printDigits(second()); Serial.print("\n");
-    Serial.print("PM 1.0 (ug/m3): ");
-    Serial.println(dataX.PM_AE_UG_1_0);
-
-    Serial.print("PM 2.5 (ug/m3): ");
-    Serial.println(dataX.PM_AE_UG_2_5);
-
-    Serial.print("PM 10.0 (ug/m3): ");
-    Serial.println(dataX.PM_AE_UG_10_0);
-
-    Serial.println();
-    delay(4000);
-  }
+  delay(60000);
 }
 
 void printDigits(int digits) {
