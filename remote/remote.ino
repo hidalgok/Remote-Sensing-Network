@@ -1,20 +1,16 @@
-#include "DHT.h"
+#include <SDS011.h>
+#include <RTClib.h>
 #include "Adafruit_FONA.h"
-#include <PMS.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
 
 //FONA Shield Pin Constants
-#define FONA_RX 2
-#define FONA_TX 3
+#define FONA_RX 50
+#define FONA_TX 51
 #define FONA_RST 4
 
-//Temp/Hum Sensor Constants
-#define DHTPIN 8     // Temp & Humid Sensor
-#define DHTTYPE DHT22   // DHT 22 signal pin
-
 //Home Station Phone Number
-#define HOME_PHONE "+17809944626"
+#define HOME_PHONE "+17808500725"
 #define PINNUMBER "" //SIM card PIN number
 #define MAXTRIES 2
 
@@ -23,9 +19,8 @@ SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
 SoftwareSerial *fonaSerial = &fonaSS;
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
-//Sensor object initialization
-DHT dht(DHTPIN, DHTTYPE);
-
+SDS011 my_sds;
+RTC_PCF8523 rtc;
 
 //Chipselect pin for data logging shield
 #define CHIPSELECT 10
@@ -47,10 +42,17 @@ void setup() {
   fonaSerial->print("AT+CNMI=2,1\r\n"); //Makes FONA print SMS notification
   fona.enableGPS(true); //Turns on GPS locator
 
-  if (!SD.begin(CHIPSELECT)) {
+  if (!SD.begin(10,11,12,13)) {
     Serial.println("Card failed, or not present");
     while(1);
   }
+
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1);
+  }
+
+  my_sds.begin(&Serial1);
 }
 
 
@@ -77,32 +79,60 @@ void extractSMS(char* smsBuffer, char* fonaNotificationBuffer){
   if (1 == sscanf(fonaNotificationBuffer, "+CMTI: " FONA_PREF_SMS_STORAGE ",%d", &slot)) {
     //pass in appropriate buffers and max lengths
     uint16_t smslen;
-    fona.readSMS(slot, smsBuffer, 250, &smslen);
+    fona.readSMS(slot, smsBuffer, 25, &smslen);
     fona.deleteSMS(slot);//Remember to delete the message once done!
   }
 }
 
 void loop() {
-    char smsBuffer[250];
+    char smsBuffer[25];
     char notifBuffer[64];
     bool AckRec = false;
     int trycount = 0;
     int pollcount = 0;
-    int sensorval = 0;
+    float p10, p25;
+    float avg_p10 = 0;
+    float avg_p25 = 0;
+    int error;
 
     while(pollcount < 6){
       //Get Sensor Data
-      sensorval += 3;
-      pollcount += 1;
-      delay(30000); //get a value every 30 seconds
+      error = my_sds.read(&p25, &p10);
+      if (!error) {
+        avg_p10 += p10;
+        avg_p25 += p25;
+        pollcount += 1;
+        Serial.println(String(p10)+","+String(p25));
+      }else{
+        Serial.println("Couldn't read from sensor");
+      }
+      delay(10000); //get a value every 10 seconds
     }
 
-    sensorval = sensorval/6; //average
+    avg_p10 = avg_p10/6; //average
+    avg_p25 = avg_p25/6;
+    Serial.println("Averages: "+String(avg_p10)+","+String(avg_p25));
     File datafile = SD.open("datalog.csv", FILE_WRITE);
     if(datafile){
-      //save data to data file
-      //use RTC to get datetime
+      Serial.println("Saving to SD Card");
+      DateTime now = rtc.now();
+      datafile.print(String(avg_p10)+","+String(avg_p25)+",");    
+      datafile.print(now.year(), DEC);
+      datafile.print('/');
+      datafile.print(now.month(), DEC);
+      datafile.print('/');
+      datafile.print(now.day(), DEC);
+      datafile.print(',');
+      datafile.print(now.hour(), DEC);
+      datafile.print(':');
+      datafile.print(now.minute(), DEC);
+      datafile.print(':');
+      datafile.print(now.second(), DEC);
+      datafile.println();
       datafile.close();
+      Serial.println("Save Success!");
+    }else{
+      Serial.println("Couldn't open file.");
     }
     
     if(fona.available()){
@@ -115,7 +145,7 @@ void loop() {
 }
 
 void smsfiledump(){
-  char smsBuffer[250];
+  char smsBuffer[25];
   char notifBuffer[64];
   File datafile = SD.open("datalog.csv", FILE_READ);
   unsigned long curr_time;

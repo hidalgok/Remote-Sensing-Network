@@ -118,9 +118,11 @@ class Adafruit_FONA : public FONAStreamType {
   uint8_t getSMSInterrupt(void);
   int8_t getNumSMS(void);
   boolean readSMS(uint8_t i, char *smsbuff, uint16_t max, uint16_t *readsize);
-  boolean sendSMS(char *smsaddr, String smsmsg); //changed
+  boolean sendSMS(char *smsaddr, String smsmsg);
   boolean deleteSMS(uint8_t i);
   boolean getSMSSender(uint8_t i, char *sender, int senderlen);
+  boolean getSMSDate(uint8_t i, char *date, int datelen);
+  boolean getSMSTime(uint8_t i, char *smstime, int timelen);
   boolean sendUSSD(char *ussdmsg, char *ussdbuff, uint16_t maxlen, uint16_t *readlen);
 
   // Time
