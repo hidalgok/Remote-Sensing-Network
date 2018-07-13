@@ -42,7 +42,7 @@ void setup() {
   fonaSerial->print("AT+CNMI=2,1\r\n"); //Makes FONA print SMS notification
   fona.enableGPS(true); //Turns on GPS locator
 
-  if (!SD.begin(10,11,12,13)) {
+  if (!SD.begin(CHIPSELECT)) {
     Serial.println("Card failed, or not present");
     while(1);
   }
