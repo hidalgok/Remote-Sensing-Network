@@ -1,4 +1,7 @@
-#include <TimeLib.h>
+
+
+//#include <RTClib.h>
+//#include <SD.h>
 
 //Taken from: https://github.com/AmphenolAdvancedSensors/Telaire/tree/T6700_Series
 /*
@@ -18,68 +21,53 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#define CHIPSELECT 10
+//RTC_PCF8523 rtc;
 
 #include "Wire.h"
 #define T6713_I2C
-
-/*
-//  Width Guide      "---------------------"
-#define SplashScreen "T6713, v1.1"
-char ScreenHeader[] = "   Carbon Dioxide";
-char ScreenFooter[] = " Advanced Sensors";
-
-
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include "OELCD.h"
-*/
-
-char DisplayUnit[] = "ppm";
-//int k = 0;
-//int line = 1;
-
            //ppm CO2 corrected = ppm CO2 measured * ((Tmeasured*pref) / (pmeasured*Tref))
 
 #ifdef T6713_I2C
 #include "T6713.h"
 #endif //T6713_I2C
 
-           void setup()
-{
+
+void setup(){
   Serial.begin(115200);  // start serial for output
   Wire.begin();
-  setTime(17,16,0,20,6,2018);
-  //Serial.println(SplashScreen);
-  //Serial.print(line); Serial.print("\t");
-  //displaySetupScreen();
+  
+//  if (!SD.begin(CHIPSELECT)) {
+//    Serial.println("Card failed, or not present");
+//    while(1);
+//  }
+//
+//  if (! rtc.begin()) {
+//    Serial.println("Couldn't find RTC");
+//    while (1);
+//  }
 }
 
 
 void loop() {
-
   GetCO2PPM();
-  Serial.print(CO2ppmValue); Serial.print(DisplayUnit); Serial.print(" "); Serial.print(hour()); printDigits(minute()); printDigits(second()); Serial.println("\n");
-  /*
-  if ( k < 9 )
-  {
-    k++;
-  } else {
-    Serial.println("");
-    k = 0;
-    line++; Serial.print(line); Serial.print("\t");
-  }
-
-  displayReading(CO2ppmValue, DisplayUnit, ScreenHeader, ScreenFooter);
-  */
-  delay(2000);
-}
-
-void printDigits(int digits) {
- // utility function for digital clock display: prints preceding colon and leading 0
- Serial.print(":");
- if (digits < 10)
- Serial.print('0');
- Serial.print(digits);
+  //DateTime now = rtc.now();
+  Serial.println(CO2ppmValue);
+//  Serial.print(',');
+//  Serial.print(now.year(), DEC);
+//  Serial.print('/');
+//  Serial.print(now.month(), DEC);
+//  Serial.print('/');
+//  Serial.print(now.day(), DEC);
+//  Serial.print(',');
+//  Serial.print(now.hour(), DEC);
+//  Serial.print(':');
+//  Serial.print(now.minute(), DEC);
+//  Serial.print(':');
+//  Serial.print(now.second(), DEC);
+//  Serial.println();
+   
+  delay(15000);
 }
 
 
